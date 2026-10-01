@@ -302,8 +302,6 @@
       "interviewer_memo": "React DevTools Profiler et Chrome Performance/Memory sont utiles. Une fuite peut venir d'un listener, timer, subscription ou référence conservée. Le candidat doit proposer une démarche mesure → hypothèse → reproduction → correction → validation.",
       "follow_ups_and_signals": "Très bon signal : mesurer avant d'optimiser et valider la correction avec le profiler."
     }
-  ]
-  [
     {
       "id": "cpp_raii_ownership",
       "tags": [
