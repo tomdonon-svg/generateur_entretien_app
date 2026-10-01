@@ -1,33 +1,15 @@
-# Prompt ChatGPT — générer des questions pour Interview Builder Offline
+# Prompt de génération
 
-Génère des objets JSON compatibles avec `question_bank.json`.
+Génère un tableau JSON `[...]` de questions d'entretien oral pour :
+- Rôle : [Tech Lead]
+- Langages : [C++]
+- Domaine : [Automotive]
+- Technologies : [AUTOSAR, CAN, SOME/IP, Linux]
+- Nombre : [40]
 
-Paramètres à remplacer :
-- Domaine : IoT
-- Rôle : Tech Lead
-- Langages : C++, Python
-- Technologies : MQTT, gRPC, AWS
-- Nombre : 20
+Chaque objet doit contenir exactement :
+`id`, `skills`, `parts`, `title`, `question`, `expected_answer`, `interviewer_memo`, `follow_ups`, `difficulty`.
 
-Chaque objet doit contenir :
-{
-  "id": "identifiant_unique_snake_case",
-  "tags": ["tags"],
-  "topics": ["Sujet"],
-  "title": "Titre",
-  "question": "Question naturelle à poser oralement",
-  "expected_answer": "Réponse attendue détaillée",
-  "interviewer_memo": "Mémo technique détaillé pour l'interviewer",
-  "follow_ups_and_signals": "Relances, bons signaux, signaux faibles et erreurs"
-}
+Questions orientées raisonnement, scénarios, debugging et arbitrage. Le mémo doit être suffisamment détaillé pour l'interviewer. Adapter les six parties au domaine plutôt que forcer des thèmes non pertinents. Pour Automotive/C++ couvrir si pertinent AUTOSAR, CAN/CAN FD, SOME/IP/SD, Ethernet, Linux, temps réel, sécurité, tests et architecture. Pour Tech Lead couvrir décisions, dette, incidents, désaccords et risques.
 
-Contraintes :
-- entretien oral ;
-- éviter les questions de pure récitation ;
-- mélanger théorie, scénarios, debugging, architecture, production et arbitrages ;
-- adapter la difficulté au rôle ;
-- Tech Lead = architecture + arbitrage + leadership technique ;
-- le mémo doit être assez détaillé pour éviter une révision préalable ;
-- tags précis pour permettre une sélection locale ;
-- concepts durables plutôt que détails de version ;
-- retourner uniquement un tableau JSON, sans Markdown ni texte autour.
+Retourne uniquement le JSON, sans Markdown ni commentaire.

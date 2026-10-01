@@ -1,0 +1,183 @@
+{
+  "questions": [
+    {
+      "id": "cpp_raii_ownership",
+      "skills": [
+        "cpp.modern",
+        "cpp.memory"
+      ],
+      "parts": [
+        "C++ moderne",
+        "Gestion mémoire"
+      ],
+      "title": "RAII et ownership",
+      "question": "Dans un composant C++ embarqué, comment définis-tu clairement l'ownership des ressources et comment évites-tu les fuites mémoire ?",
+      "expected_answer": "S'appuyer sur RAII, privilégier unique_ptr pour un propriétaire unique, shared_ptr seulement pour un ownership réellement partagé et éviter les new/delete manuels.",
+      "interviewer_memo": "RAII lie la durée de vie d'une ressource à celle d'un objet. unique_ptr exprime un ownership unique ; shared_ptr utilise un comptage de références ; weak_ptr est non propriétaire et peut casser des cycles.",
+      "follow_ups": "Pourquoi ne pas utiliser shared_ptr partout ? Bon signal : coût, cycles et ownership explicite.",
+      "difficulty": 3
+    },
+    {
+      "id": "iot_mqtt_qos",
+      "skills": [
+        "iot.mqtt",
+        "iot.resilience"
+      ],
+      "parts": [
+        "MQTT / Communication",
+        "Résilience"
+      ],
+      "title": "MQTT QoS et doublons",
+      "question": "Un device renvoie une mesure car il n'a pas reçu de confirmation. Le Cloud reçoit deux fois la donnée. Comment gères-tu cela ?",
+      "expected_answer": "Avec MQTT QoS 1, accepter les doublons possibles et rendre le traitement idempotent, par exemple avec un identifiant de message ou un sequence number.",
+      "interviewer_memo": "QoS 0 est au plus une fois, QoS 1 au moins une fois et peut produire des doublons. QoS 2 apporte davantage de garanties au niveau MQTT mais ne garantit pas l'exactly-once end-to-end. L'idempotence applicative reste importante.",
+      "follow_ups": "MQTT garantit-il zéro doublon ? Non. Très bon signal : distinction QoS, idempotence et exactly-once.",
+      "difficulty": 3
+    },
+    {
+      "id": "grpc_contract",
+      "skills": [
+        "grpc",
+        "api.versioning"
+      ],
+      "parts": [
+        "gRPC / APIs",
+        "Architecture"
+      ],
+      "title": "Évolution d'un contrat Protobuf",
+      "question": "Une API gRPC utilisée par plusieurs clients doit évoluer. Quelles précautions prends-tu dans le .proto ?",
+      "expected_answer": "Préserver la compatibilité, ne pas réutiliser les numéros de champs supprimés, privilégier l'ajout de champs et gérer les versions lors des déploiements progressifs.",
+      "interviewer_memo": "Protobuf identifie les champs par numéro. Clients et serveurs peuvent temporairement être à des versions différentes. Il faut donc penser compatibilité et déploiement progressif.",
+      "follow_ups": "Pourquoi les numéros de champs sont-ils importants ? Parce qu'ils font partie du contrat binaire Protobuf.",
+      "difficulty": 4
+    },
+    {
+      "id": "cloud_observability",
+      "skills": [
+        "cloud",
+        "observability",
+        "iot"
+      ],
+      "parts": [
+        "Cloud & Production",
+        "Observabilité"
+      ],
+      "title": "Observabilité d'une flotte IoT",
+      "question": "Comment détectes-tu qu'une flotte de devices commence à avoir un problème en production ?",
+      "expected_answer": "Métriques, logs et événements corrélés : connectivité, dernière communication, erreurs, version, crashes/reboots, backlog local et latence d'ingestion.",
+      "interviewer_memo": "Segmenter par version, modèle, région et vague de déploiement. Une bonne observabilité doit permettre détection puis diagnostic.",
+      "follow_ups": "Que regardes-tu si seulement une version est touchée ? Très bon signal : corrélation avec le rollout.",
+      "difficulty": 4
+    },
+    {
+      "id": "autosar_classic_adaptive",
+      "skills": [
+        "autosar",
+        "automotive",
+        "architecture"
+      ],
+      "parts": [
+        "AUTOSAR",
+        "Architecture Automotive"
+      ],
+      "title": "AUTOSAR Classic vs Adaptive",
+      "question": "Comment expliquerais-tu à une équipe la différence entre AUTOSAR Classic et AUTOSAR Adaptive ?",
+      "expected_answer": "Classic cible notamment les ECU fortement contraintes et les fonctions déterministes ; Adaptive cible des plateformes plus puissantes et des applications nécessitant davantage de dynamicité, services et communication moderne.",
+      "interviewer_memo": "Classic est très présent sur microcontrôleurs et systèmes temps réel contraints. Adaptive vise des plateformes plus riches, souvent POSIX/Linux-like, et répond aux besoins de compute, services et évolutivité.",
+      "follow_ups": "Pourquoi choisir Adaptive ? Bon signal : puissance, dynamicité, services, Ethernet et évolutivité.",
+      "difficulty": 3
+    },
+    {
+      "id": "can_arbitration",
+      "skills": [
+        "can",
+        "automotive",
+        "networking"
+      ],
+      "parts": [
+        "CAN",
+        "Communication"
+      ],
+      "title": "Arbitrage CAN",
+      "question": "Deux ECUs commencent à transmettre simultanément sur un bus CAN. Que se passe-t-il ?",
+      "expected_answer": "CAN utilise un arbitrage bit à bit non destructif basé sur la priorité de l'identifiant. Le message prioritaire continue tandis que les autres arrêtent leur transmission.",
+      "interviewer_memo": "Un bit dominant écrase un bit récessif. L'arbitrage permet plusieurs tentatives simultanées sans collision destructrice. Les identifiants déterminent donc indirectement la priorité.",
+      "follow_ups": "Que se passe-t-il si une trame très prioritaire monopolise le bus ? Discuter latence, fairness et dimensionnement.",
+      "difficulty": 3
+    },
+    {
+      "id": "someip_sd",
+      "skills": [
+        "someip",
+        "someip_sd",
+        "automotive",
+        "ethernet"
+      ],
+      "parts": [
+        "SOME/IP",
+        "Communication"
+      ],
+      "title": "Service Discovery",
+      "question": "Une application SOME/IP ne trouve plus un service après un redémarrage réseau. Que vérifies-tu ?",
+      "expected_answer": "Vérifier les annonces/offers, subscriptions, adressage IP, ports, multicast si utilisé, timeouts et état du réseau.",
+      "interviewer_memo": "SOME/IP-SD permet aux services de s'annoncer et aux clients de rechercher/souscrire. Distinguer problème SD, transport, IP/Ethernet et application.",
+      "follow_ups": "Très bon signal : utiliser une capture réseau et raisonner par couches.",
+      "difficulty": 4
+    },
+    {
+      "id": "linux_memory_debug",
+      "skills": [
+        "linux",
+        "memory",
+        "debugging",
+        "cpp"
+      ],
+      "parts": [
+        "Linux",
+        "Debugging"
+      ],
+      "title": "Fuite mémoire Linux",
+      "question": "Un daemon C++ consomme progressivement toute la RAM d'une machine Linux. Comment enquêtes-tu ?",
+      "expected_answer": "Confirmer la tendance, identifier le processus, profiler les allocations, reproduire et rechercher fuite, cache non borné ou croissance de buffers.",
+      "interviewer_memo": "Outils possibles : Valgrind, sanitizers, heap profilers, /proc et pmap selon contexte. Distinguer fuite réelle, cache volontaire et fragmentation.",
+      "follow_ups": "Bon signal : mesurer d'abord et distinguer heap growth, cache et fragmentation.",
+      "difficulty": 4
+    },
+    {
+      "id": "techlead_tradeoff",
+      "skills": [
+        "tech_lead",
+        "architecture",
+        "decision"
+      ],
+      "parts": [
+        "Leadership & arbitrage",
+        "Architecture"
+      ],
+      "title": "Décision d'architecture",
+      "question": "Deux solutions sont techniquement défendables et l'équipe n'arrive pas à se mettre d'accord. Comment prends-tu la décision ?",
+      "expected_answer": "Définir les critères, expliciter les contraintes, comparer objectivement, faire un POC si utile, décider et documenter les raisons.",
+      "interviewer_memo": "Un Tech Lead doit créer un cadre de décision. Un ADR peut documenter contexte, options, décision et conséquences. Les critères peuvent inclure performance, coût, risque, maintenabilité et time-to-market.",
+      "follow_ups": "Mauvais signal : 'je tranche parce que je suis Tech Lead'. Très bon signal : critères objectifs et décision réversible lorsque possible.",
+      "difficulty": 4
+    },
+    {
+      "id": "techlead_incident",
+      "skills": [
+        "tech_lead",
+        "incident",
+        "production"
+      ],
+      "parts": [
+        "Leadership & arbitrage",
+        "Cloud & Production"
+      ],
+      "title": "Incident de production",
+      "question": "Une release provoque des crashes sur plusieurs véhicules. Que fais-tu pendant les premières minutes puis après l'incident ?",
+      "expected_answer": "Stabiliser, limiter la propagation, décider rollback ou mitigation, organiser la communication, puis réaliser un postmortem et des actions correctives.",
+      "interviewer_memo": "Pendant l'incident : priorité au rétablissement et aux faits. Après : root cause, facteurs contributifs, tests manquants et amélioration du rollout, sans blame individuel.",
+      "follow_ups": "Bon signal : prendre une décision avec informations incomplètes et améliorer le système après incident.",
+      "difficulty": 4
+    }
+  ]
+}

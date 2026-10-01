@@ -1,36 +1,18 @@
-# Interview Builder Offline
-
-Application Streamlit 100 % locale, sans API OpenAI.
+# Interview Builder Offline v3
 
 ## Installation Windows
-
-Installe Python depuis https://www.python.org/downloads/
-
-Dans PowerShell, dans le dossier :
-
 ```powershell
 py -m pip install -r requirements.txt
 py -m streamlit run app.py
 ```
 
-Le navigateur s'ouvre ensuite sur l'application.
+## Bibliothèque
+Ajoute autant de fichiers `.json` que souhaité dans `question_bank/`.
 
-## Fonctionnement
+Les deux formats sont acceptés :
+- `{ "questions": [...] }`
+- `[...]`
 
-L'application sélectionne localement les questions de `question_bank.json`
-selon les langages, domaine, rôle et technologies.
+L'application charge tous les `.json`, valide les champs, détecte les IDs dupliqués et affiche les erreurs JSON avec ligne/colonne au lieu de planter.
 
-Elle affiche les quatre blocs :
-- question ;
-- réponse attendue ;
-- mémo interviewer ;
-- relances / signaux.
-
-Elle permet l'export Word et Markdown.
-
-## Ajouter des questions
-
-Utilise `PROMPT_GENERATION_QUESTIONS.md` dans ChatGPT pour générer de nouvelles
-questions. Ajoute ensuite les objets JSON dans `question_bank.json`.
-
-Aucune requête Internet ou OpenAI n'est effectuée par l'application.
+Aucune clé OpenAI et aucun appel API ne sont nécessaires.
