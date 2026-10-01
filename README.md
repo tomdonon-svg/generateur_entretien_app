@@ -1,53 +1,36 @@
-# Générateur d'entretien technique — application web
+# Interview Builder Offline
 
-Cette version est une vraie petite application web Streamlit.
+Application Streamlit 100 % locale, sans API OpenAI.
 
-Elle fonctionne dans un navigateur et permet de générer :
-- un questionnaire oral ;
-- exactement 6 parties choisies dynamiquement par le modèle ;
-- des questions adaptées au langage, domaine, rôle et technologies ;
-- un mémo détaillé pour l'interviewer ;
-- des relances et signaux ;
-- un fichier Markdown ;
-- un fichier Word.
+## Installation Windows
 
-## Option recommandée : Streamlit Community Cloud
+Installe Python depuis https://www.python.org/downloads/
 
-1. Crée un dépôt GitHub.
-2. Mets dedans :
-   - `app.py`
-   - `requirements.txt`
-3. Va sur https://share.streamlit.io/
-4. Connecte ton dépôt GitHub.
-5. Sélectionne `app.py`.
-6. Déploie.
-7. L'application s'ouvre dans ton navigateur.
+Dans PowerShell, dans le dossier :
 
-La clé API peut être saisie directement dans l'interface. Pour un usage personnel,
-c'est simple. Pour une application partagée, il est préférable de mettre la clé
-dans les Secrets de Streamlit plutôt que de demander aux utilisateurs de la saisir.
-
-## Exécution locale
-
-Si Python est installé :
-
-```bash
-pip install -r requirements.txt
-streamlit run app.py
+```powershell
+py -m pip install -r requirements.txt
+py -m streamlit run app.py
 ```
 
-Puis ouvrir l'URL affichée par Streamlit.
+Le navigateur s'ouvre ensuite sur l'application.
 
-## Paramètres
+## Fonctionnement
 
-- Langages / frameworks
-- Domaine
-- Rôle
-- Technologies
-- Durée
-- Nombre de questions
-- Contexte complémentaire
-- Modèle OpenAI
+L'application sélectionne localement les questions de `question_bank.json`
+selon les langages, domaine, rôle et technologies.
 
-Le modèle décide lui-même des six parties. Il n'y a pas de liste de six parties
-codée en dur dans l'application.
+Elle affiche les quatre blocs :
+- question ;
+- réponse attendue ;
+- mémo interviewer ;
+- relances / signaux.
+
+Elle permet l'export Word et Markdown.
+
+## Ajouter des questions
+
+Utilise `PROMPT_GENERATION_QUESTIONS.md` dans ChatGPT pour générer de nouvelles
+questions. Ajoute ensuite les objets JSON dans `question_bank.json`.
+
+Aucune requête Internet ou OpenAI n'est effectuée par l'application.

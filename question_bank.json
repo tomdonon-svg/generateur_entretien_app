@@ -1,0 +1,1037 @@
+{
+  "version": 1,
+  "questions": [
+    {
+      "id": "cpp_raii",
+      "tags": [
+        "cpp",
+        "c++",
+        "senior",
+        "tech_lead",
+        "raii",
+        "memory"
+      ],
+      "topics": [
+        "C++ moderne"
+      ],
+      "title": "RAII et smart pointers",
+      "question": "Peux-tu m'expliquer la différence entre unique_ptr, shared_ptr et weak_ptr et dans quels cas tu utiliserais chacun ?",
+      "expected_answer": "unique_ptr représente un ownership unique, shared_ptr un ownership partagé et weak_ptr une référence non propriétaire vers un objet géré par shared_ptr. Le candidat doit relier cela au RAII et à un ownership explicite.",
+      "interviewer_memo": "RAII lie la durée de vie d'une ressource à celle d'un objet. En C++ moderne, éviter les new/delete manuels. unique_ptr est le choix par défaut lorsqu'il existe un seul propriétaire. shared_ptr ajoute un compteur de références et doit correspondre à un vrai ownership partagé. weak_ptr n'augmente pas le compteur et sert notamment à casser les cycles.",
+      "follow_ups_and_signals": "Relance : « Utiliserais-tu shared_ptr partout ? » Bon signal : non, ownership explicite et unique_ptr par défaut. Très bon signal : mention de make_unique, make_shared et des cycles."
+    },
+    {
+      "id": "cpp_concurrency",
+      "tags": [
+        "cpp",
+        "c++",
+        "senior",
+        "tech_lead",
+        "concurrency",
+        "multithreading"
+      ],
+      "topics": [
+        "C++ moderne",
+        "Concurrence"
+      ],
+      "title": "Concurrence et données partagées",
+      "question": "Plusieurs threads accèdent à une structure commune. Comment la protèges-tu et comment évites-tu d'avoir des mutex partout ?",
+      "expected_answer": "Mutex avec lock_guard ou unique_lock, atomic lorsque pertinent, et réduction de l'état partagé. Le candidat doit connaître data races et deadlocks.",
+      "interviewer_memo": "Une data race survient lors d'accès concurrents non synchronisés dont au moins un est une écriture. lock_guard convient à une section critique simple ; unique_lock offre davantage de contrôle. atomic convient à certains cas simples. Une bonne architecture limite le partage d'état via queues, message passing ou ownership clair.",
+      "follow_ups_and_signals": "Relance : « Comment éviter une forêt de mutex ? » Bon signal : immutabilité, message passing, queues, réduction de l'état partagé."
+    },
+    {
+      "id": "iot_architecture",
+      "tags": [
+        "iot",
+        "tech_lead",
+        "architecture",
+        "edge",
+        "cloud",
+        "resilience"
+      ],
+      "topics": [
+        "Architecture IoT",
+        "Résilience"
+      ],
+      "title": "Architecture IoT avec réseau instable",
+      "question": "Un Raspberry Pi collecte des mesures industrielles et doit les envoyer au Cloud. La connexion peut être coupée plusieurs heures. Comment architecturerais-tu la solution ?",
+      "expected_answer": "Collecte edge, stockage local persistant, communication MQTT ou équivalent, reconnexion avec backoff, replay progressif au retour du réseau, limites de stockage, monitoring et stratégie de purge.",
+      "interviewer_memo": "Un buffer RAM ne survit pas à un reboot. Un stockage local persistant peut servir de queue durable. Au retour du réseau, il faut gérer la backpressure pour éviter un pic massif. Il faut aussi décider quoi faire lorsque le stockage est plein et comment superviser la santé du device.",
+      "follow_ups_and_signals": "Relances : « Trois jours offline ? », « stockage plein ? », « réseau revenu mais lent ? ». Très bon signal : persistance, backpressure, priorisation, purge et observabilité."
+    },
+    {
+      "id": "mqtt_qos",
+      "tags": [
+        "iot",
+        "mqtt",
+        "tech_lead",
+        "distributed_systems",
+        "resilience"
+      ],
+      "topics": [
+        "MQTT",
+        "Résilience"
+      ],
+      "title": "MQTT, QoS et doublons",
+      "question": "Un device renvoie une mesure parce qu'il n'a pas reçu de confirmation. Le Cloud reçoit deux fois le message. Comment gères-tu cela ?",
+      "expected_answer": "Accepter les duplications possibles, notamment avec QoS 1, et rendre le traitement idempotent. Utiliser un identifiant unique et éventuellement un sequence number.",
+      "interviewer_memo": "QoS 0 ne garantit pas la livraison. QoS 1 est au moins une fois et peut donc produire des doublons. QoS 2 apporte davantage de garanties au niveau MQTT mais ne rend pas tout le système exactly-once. L'idempotence doit donc être pensée côté traitement.",
+      "follow_ups_and_signals": "Relance : « MQTT garantit-il zéro doublon ? » Non. Très bon signal : distinction QoS, idempotence et exactly-once end-to-end."
+    },
+    {
+      "id": "mqtt_vs_grpc",
+      "tags": [
+        "iot",
+        "mqtt",
+        "grpc",
+        "architecture",
+        "tech_lead"
+      ],
+      "topics": [
+        "Protocoles",
+        "Architecture IoT"
+      ],
+      "title": "MQTT vs gRPC",
+      "question": "Pourquoi choisir MQTT plutôt que gRPC dans une architecture IoT ? Et quand gRPC serait-il plus pertinent ?",
+      "expected_answer": "MQTT convient au pub/sub, au broker, au découplage et aux réseaux instables. gRPC convient davantage aux RPC fortement typés entre services, avec Protobuf, HTTP/2 et streaming.",
+      "interviewer_memo": "MQTT découple producteurs et consommateurs via broker. gRPC est plus adapté aux appels service-à-service avec contrat Protobuf. Le choix dépend du modèle de communication, de la connectivité, du scaling et des contraintes opérationnelles plutôt que d'un simple classement de performance.",
+      "follow_ups_and_signals": "Relance : « Mettrais-tu gRPC directement sur 20 000 devices ? » Bon signal : analyse de connectivité, pub/sub, scaling et exploitation."
+    },
+    {
+      "id": "iot_data_model",
+      "tags": [
+        "iot",
+        "data_model",
+        "cloud",
+        "tech_lead"
+      ],
+      "topics": [
+        "Data model",
+        "IoT"
+      ],
+      "title": "Modèle de données de télémétrie",
+      "question": "Tu dois définir le format d'une mesure de température. Quels champs mets-tu et pourquoi ?",
+      "expected_answer": "Exemple : device_id, event_time, value, unit, measurement_type, sequence_number et schema_version.",
+      "interviewer_memo": "device_id identifie le device. event_time correspond au moment de la mesure, distinct de l'ingestion Cloud. unit évite les ambiguïtés. sequence_number aide à détecter trous et doublons. schema_version permet l'évolution progressive du protocole.",
+      "follow_ups_and_signals": "Relance : « Pourquoi une schema_version ? » Attendu : les devices ne sont pas tous mis à jour simultanément. Très bon signal : compatibilité et migration progressive."
+    },
+    {
+      "id": "iot_security",
+      "tags": [
+        "iot",
+        "cloud",
+        "security",
+        "tech_lead",
+        "aws"
+      ],
+      "topics": [
+        "Cloud",
+        "Sécurité IoT"
+      ],
+      "title": "Identité et sécurité des devices",
+      "question": "Tu dois déployer 20 000 Raspberry Pi. Comment sécurises-tu leur communication avec le Cloud ?",
+      "expected_answer": "TLS, identité individuelle par device, certificats ou credentials individuels, rotation/révocation et moindre privilège. Pas de secret commun à toute la flotte.",
+      "interviewer_memo": "Un secret partagé compromet potentiellement toute la flotte si un device est compromis. Une identité individuelle permet la révocation ciblée. Un niveau avancé peut mentionner secure boot, stockage sécurisé des clés et firmware signé.",
+      "follow_ups_and_signals": "Relance : « Que fais-tu si un Raspberry est volé ? » Bon signal : révocation, rotation, secure boot, clés protégées et firmware signé."
+    },
+    {
+      "id": "ota",
+      "tags": [
+        "iot",
+        "cloud",
+        "ota",
+        "deployment",
+        "tech_lead",
+        "embedded"
+      ],
+      "topics": [
+        "Déploiement",
+        "IoT"
+      ],
+      "title": "OTA et déploiement progressif",
+      "question": "Une nouvelle version du logiciel C++ doit être déployée sur 20 000 équipements. Quelle stratégie mets-tu en place ?",
+      "expected_answer": "Canary, déploiement progressif, monitoring, arrêt du rollout, rollback, versionnement et vérification de l'intégrité/signature.",
+      "interviewer_memo": "Éviter un déploiement simultané. Exemple : 1 %, 10 %, 50 %, 100 % avec métriques entre chaque étape. A/B ou double partition peuvent faciliter le rollback. Surveiller crashes, reboot loops, mémoire, connectivité et télémétrie.",
+      "follow_ups_and_signals": "Scénario : 10 % rebootent en boucle. Attendu : stopper, diagnostiquer, rollback, corriger puis reprendre progressivement."
+    },
+    {
+      "id": "timeseries",
+      "tags": [
+        "iot",
+        "cloud",
+        "timeseries",
+        "aws",
+        "architecture"
+      ],
+      "topics": [
+        "Cloud",
+        "Data platform"
+      ],
+      "title": "Stockage des séries temporelles",
+      "question": "Les mesures MQTT arrivent dans le Cloud. Comment choisis-tu leur stockage ?",
+      "expected_answer": "Une base time-series est naturellement adaptée. Le choix dépend de volumétrie, fréquence, requêtes, rétention, agrégation et coût.",
+      "interviewer_memo": "Exemples : Timestream, TimescaleDB, InfluxDB ou équivalents. Distinguer données chaudes, historiques, données brutes et agrégations. Réfléchir à l'ingestion, cardinalité, rétention et coût plutôt que simplement citer un produit.",
+      "follow_ups_and_signals": "Relance : « Un million de devices, une mesure par seconde : quels problèmes ? » Attendu : volumétrie, ingestion, partitionnement, coût, rétention et scaling."
+    },
+    {
+      "id": "techlead_tradeoff",
+      "tags": [
+        "tech_lead",
+        "architecture",
+        "leadership",
+        "decision"
+      ],
+      "topics": [
+        "Leadership technique",
+        "Architecture"
+      ],
+      "title": "Arbitrage performance vs simplicité",
+      "question": "Une architecture est très performante mais complexe ; une autre est simple mais légèrement moins performante. Comment arbitres-tu ?",
+      "expected_answer": "Partir des exigences, définir des critères, mesurer si nécessaire et comparer performance, complexité, maintenance, coût, risques, compétences et évolutivité.",
+      "interviewer_memo": "Transformer opinion en décision : exigences, hypothèses, critères, mesures/POC, décision et conséquences. Une performance inutile ne justifie pas une complexité coûteuse.",
+      "follow_ups_and_signals": "Très bon signal : benchmark, critères objectifs, ADR et coût de maintenance. Mauvais signal : choisir systématiquement la solution la plus performante."
+    },
+    {
+      "id": "techlead_disagreement",
+      "tags": [
+        "tech_lead",
+        "leadership",
+        "architecture",
+        "communication"
+      ],
+      "topics": [
+        "Leadership technique"
+      ],
+      "title": "Désaccord technique",
+      "question": "Deux développeurs expérimentés défendent deux architectures techniquement défendables. Comment interviens-tu ?",
+      "expected_answer": "Faire expliciter les hypothèses, définir les critères, chercher des éléments objectifs, éventuellement faire un POC, décider, documenter et faire avancer l'équipe.",
+      "interviewer_memo": "Le Tech Lead crée un cadre de décision. Un ADR peut formaliser contexte, options, critères, décision et conséquences. Le désaccord devient problématique lorsqu'il bloque l'équipe.",
+      "follow_ups_and_signals": "Relance : « Et s'ils refusent ta décision ? » Bon signal : écoute, décision assumée, responsabilité, escalade seulement si nécessaire et capacité à revenir sur une décision."
+    },
+    {
+      "id": "observability",
+      "tags": [
+        "iot",
+        "cloud",
+        "observability",
+        "production",
+        "tech_lead"
+      ],
+      "topics": [
+        "Observabilité",
+        "Production"
+      ],
+      "title": "Observabilité d'une flotte IoT",
+      "question": "Comment saurais-tu qu'une flotte de 20 000 devices commence à avoir un problème de production ?",
+      "expected_answer": "Métriques, logs, alertes et corrélation. Suivre connectivité, dernière communication, erreurs, version logicielle, crashes/reboots, backlog local et latence d'ingestion.",
+      "interviewer_memo": "Il faut des signaux de santé et des métriques métier. Segmenter par version, modèle, région et période de déploiement permet de repérer une régression. L'objectif est de détecter et diagnostiquer avant l'incident majeur.",
+      "follow_ups_and_signals": "Relance : « 5 % doublent leur consommation mémoire : que regardes-tu ? » Très bon signal : corrélation avec version, logs, métriques et rollout."
+    },
+    {
+      "id": "grpc_proto",
+      "tags": [
+        "grpc",
+        "backend",
+        "cpp",
+        "api",
+        "architecture"
+      ],
+      "topics": [
+        "gRPC",
+        "API design"
+      ],
+      "title": "Évolution d'un contrat Protobuf",
+      "question": "Une API gRPC utilisée par plusieurs clients doit évoluer. Quelles précautions prends-tu dans le .proto ?",
+      "expected_answer": "Préserver la compatibilité, ne pas réutiliser les numéros de champs supprimés, privilégier l'ajout de champs et gérer les déploiements progressifs.",
+      "interviewer_memo": "Protobuf identifie les champs par des numéros. Les numéros supprimés ne doivent pas être réutilisés. Les déploiements doivent tenir compte du fait que clients et serveurs peuvent être temporairement à des versions différentes.",
+      "follow_ups_and_signals": "Relance : « Peut-on renommer un champ ? » Le nom et le numéro sont distincts, mais les règles de compatibilité et la génération de code doivent être respectées."
+    },
+    {
+      "id": "timestamps",
+      "tags": [
+        "iot",
+        "distributed_systems",
+        "cloud",
+        "data_model"
+      ],
+      "topics": [
+        "Data model",
+        "Systèmes distribués"
+      ],
+      "title": "Event time vs ingestion time",
+      "question": "Le device mesure à 10:02:15 mais le Cloud reçoit à 10:07:48. Quels timestamps stockes-tu ?",
+      "expected_answer": "Idéalement event_time et ingestion_time.",
+      "interviewer_memo": "La distinction est essentielle avec réseau instable et fonctionnement offline. event_time représente le moment de l'événement ; ingestion_time celui de l'arrivée. Le device doit idéalement être synchronisé par NTP ou mécanisme équivalent.",
+      "follow_ups_and_signals": "Relance : « Pourquoi l'heure du Cloud ne suffit-elle pas ? » Elle ne représente pas le moment réel de l'événement et fausse les analyses temporelles."
+    },
+    {
+      "id": "backend_api",
+      "tags": [
+        "backend",
+        "api",
+        "senior",
+        "tech_lead"
+      ],
+      "topics": [
+        "Backend",
+        "API design"
+      ],
+      "title": "Conception d'une API robuste",
+      "question": "Tu dois concevoir une API utilisée par plusieurs clients. Quels points regardes-tu au-delà des endpoints ?",
+      "expected_answer": "Contrat, validation, erreurs, auth, idempotence, pagination, versionnement, observabilité, limites de charge et compatibilité.",
+      "interviewer_memo": "Une API est un contrat. Penser aux erreurs, timeouts, retries, idempotence, sécurité, évolution et observabilité. Pour une API publique, backward compatibility et versionnement sont particulièrement importants.",
+      "follow_ups_and_signals": "Bon signal : le candidat parle des timeouts, retries et doublons, pas seulement du format des endpoints."
+    },
+    {
+      "id": "frontend_perf",
+      "tags": [
+        "frontend",
+        "react",
+        "typescript",
+        "performance",
+        "senior"
+      ],
+      "topics": [
+        "Frontend",
+        "Performance"
+      ],
+      "title": "Diagnostic d'un frontend lent",
+      "question": "Une application React devient lente après plusieurs minutes. Comment diagnostiques-tu le problème ?",
+      "expected_answer": "Profiler avant d'optimiser, inspecter re-renders, mémoire, listeners, timers, réseau et DOM. Rechercher notamment les fuites mémoire et effets mal nettoyés.",
+      "interviewer_memo": "React DevTools Profiler et Chrome Performance/Memory sont utiles. Une fuite peut venir d'un listener, timer, subscription ou référence conservée. Le candidat doit proposer une démarche mesure → hypothèse → reproduction → correction → validation.",
+      "follow_ups_and_signals": "Très bon signal : mesurer avant d'optimiser et valider la correction avec le profiler."
+    }
+  ]
+  [
+    {
+      "id": "cpp_raii_ownership",
+      "tags": [
+        "cpp",
+        "raii",
+        "memory",
+        "smart_pointer",
+        "tech_lead"
+      ],
+      "topics": [
+        "C++ moderne",
+        "Gestion mémoire"
+      ],
+      "title": "RAII et ownership",
+      "question": "Dans un composant C++ embarqué, comment définis-tu clairement l'ownership des ressources et comment évites-tu les fuites mémoire ?",
+      "expected_answer": "S'appuyer sur RAII et privilégier les types dont la durée de vie est automatiquement gérée. Utiliser unique_ptr lorsqu'il existe un propriétaire unique, shared_ptr uniquement lorsqu'un ownership partagé est réellement nécessaire, et éviter les new/delete manuels.",
+      "interviewer_memo": "RAII signifie que l'acquisition et la libération d'une ressource sont liées à la durée de vie d'un objet. En Automotive, cela concerne la mémoire mais aussi fichiers, sockets, mutex, handles système, etc. unique_ptr exprime un ownership unique. shared_ptr utilise un comptage de références et peut avoir un coût non négligeable. weak_ptr permet une référence non propriétaire et peut casser des cycles. Un bon candidat doit parler d'ownership avant de parler de smart pointers.",
+      "follow_ups_and_signals": "Relance : « Pourquoi ne pas utiliser shared_ptr partout ? » Bon signal : coût, cycles, ownership implicite. Très bon signal : le candidat propose d'abord de modifier le design pour éviter l'ownership partagé."
+    },
+    {
+      "id": "cpp_move_semantics",
+      "tags": [
+        "cpp",
+        "move",
+        "rvalue",
+        "performance",
+        "memory"
+      ],
+      "topics": [
+        "C++ moderne",
+        "Performance"
+      ],
+      "title": "Move semantics",
+      "question": "Tu observes beaucoup de copies d'objets contenant des buffers dans une chaîne de traitement CAN. Que regardes-tu en premier ?",
+      "expected_answer": "Identifier les copies réellement présentes, comprendre les durées de vie et utiliser le move semantics lorsque cela a du sens, sans appliquer std::move aveuglément.",
+      "interviewer_memo": "std::move ne déplace rien à lui seul : il transforme principalement une expression en xvalue permettant au constructeur ou opérateur de move d'être sélectionné. Il faut vérifier que le type est réellement moveable et que l'optimisation apporte quelque chose. Le candidat peut mentionner NRVO, retour par valeur et passage par référence.",
+      "follow_ups_and_signals": "Relance : « Est-ce que std::move(x) garantit que x sera vidé ? » Non. Très bon signal : distinction entre cast vers rvalue et opération de déplacement."
+    },
+    {
+      "id": "cpp_const_correctness",
+      "tags": [
+        "cpp",
+        "const",
+        "api_design",
+        "architecture"
+      ],
+      "topics": [
+        "C++",
+        "Conception d'API"
+      ],
+      "title": "Const-correctness",
+      "question": "Pourquoi la const-correctness est-elle particulièrement intéressante dans une base C++ importante ?",
+      "expected_answer": "Elle exprime les contrats de modification, réduit les effets de bord, améliore la lisibilité et permet au compilateur de détecter certaines erreurs.",
+      "interviewer_memo": "Un bon design utilise const pour les méthodes qui ne modifient pas l'état logique de l'objet et pour les données qui ne doivent pas être modifiées. La const-correctness devient importante lorsque plusieurs équipes manipulent les mêmes APIs.",
+      "follow_ups_and_signals": "Bon signal : le candidat parle de contrat d'API et de sécurité du code, pas seulement d'une règle stylistique."
+    },
+    {
+      "id": "cpp_exception_strategy",
+      "tags": [
+        "cpp",
+        "exceptions",
+        "embedded",
+        "automotive",
+        "safety"
+      ],
+      "topics": [
+        "C++",
+        "Robustesse"
+      ],
+      "title": "Exceptions en embarqué",
+      "question": "Dans un composant C++ Automotive, comment déciderais-tu d'utiliser ou non les exceptions ?",
+      "expected_answer": "La décision dépend des contraintes de la plateforme, des règles projet, de la toolchain et des exigences de sûreté. Si les exceptions sont interdites, utiliser une stratégie d'erreurs explicite et cohérente.",
+      "interviewer_memo": "Il ne faut pas répondre simplement « exceptions bonnes » ou « exceptions mauvaises ». Certains environnements AUTOSAR et projets safety-critical imposent des restrictions. Le Tech Lead doit connaître les contraintes de compilation, performance, déterminisme, certification et coding guidelines.",
+      "follow_ups_and_signals": "Très bon signal : le candidat relie le choix à l'environnement, aux exigences safety et aux coding guidelines."
+    },
+    {
+      "id": "cpp_concurrency",
+      "tags": [
+        "cpp",
+        "multithreading",
+        "mutex",
+        "atomic",
+        "concurrency"
+      ],
+      "topics": [
+        "Concurrence"
+      ],
+      "title": "Concurrence et data race",
+      "question": "Deux threads accèdent à une structure contenant l'état d'un véhicule, dont un modifie les données. Comment sécurises-tu l'accès ?",
+      "expected_answer": "Identifier précisément les données partagées, protéger les invariants avec un mécanisme de synchronisation adapté et éviter le partage d'état lorsque possible. Utiliser mutex ou atomic selon la nature du problème.",
+      "interviewer_memo": "Une atomic ne suffit pas forcément à protéger un invariant composé de plusieurs variables. Un mutex protège une section critique. En architecture embarquée, on peut aussi utiliser message passing, queues ou ownership transféré entre threads afin de réduire les données partagées.",
+      "follow_ups_and_signals": "Relance : « Pourquoi ne pas mettre un mutex global ? » Attendu : contention, latence, risque de deadlock et mauvaise granularité."
+    },
+    {
+      "id": "cpp_deadlock",
+      "tags": [
+        "cpp",
+        "concurrency",
+        "deadlock",
+        "mutex"
+      ],
+      "topics": [
+        "Concurrence",
+        "Debugging"
+      ],
+      "title": "Diagnostiquer un deadlock",
+      "question": "Une ECU devient parfois complètement bloquée et les threads semblent attendre indéfiniment. Comment recherches-tu un deadlock ?",
+      "expected_answer": "Capturer l'état des threads, identifier les mutex détenus et attendus, reconstruire l'ordre d'acquisition et rechercher un cycle d'attente.",
+      "interviewer_memo": "Un deadlock classique implique plusieurs threads et des acquisitions de verrous dans des ordres différents. Des outils de debugging et dumps de threads peuvent aider. Prévention : ordre d'acquisition imposé, réduction des locks imbriqués, scopes courts et architecture limitant l'état partagé.",
+      "follow_ups_and_signals": "Très bon signal : le candidat parle d'un graphe d'attente ou d'un ordre global des locks."
+    },
+    {
+      "id": "autosar_classic_vs_adaptive",
+      "tags": [
+        "autosar",
+        "classic",
+        "adaptive",
+        "architecture"
+      ],
+      "topics": [
+        "AUTOSAR",
+        "Architecture Automotive"
+      ],
+      "title": "AUTOSAR Classic vs Adaptive",
+      "question": "Comment expliquerais-tu à une équipe la différence entre AUTOSAR Classic et AUTOSAR Adaptive ?",
+      "expected_answer": "Classic cible notamment les ECU fortement contraintes et les fonctions avec comportement plus déterministe ; Adaptive cible des plateformes plus puissantes et des applications nécessitant davantage de dynamicité, communication moderne et gestion applicative.",
+      "interviewer_memo": "Classic est historiquement très présent sur microcontrôleurs et systèmes temps réel contraints. Adaptive s'appuie sur des plateformes plus riches, souvent POSIX/Linux-like, et répond notamment aux besoins de compute intensif, services et mises à jour dynamiques. Le candidat doit surtout comprendre les implications architecturales plutôt que réciter une liste de composants.",
+      "follow_ups_and_signals": "Relance : « Pourquoi choisir Adaptive ? » Bon signal : puissance de calcul, dynamicité, services, Ethernet et évolutivité."
+    },
+    {
+      "id": "autosar_rte",
+      "tags": [
+        "autosar",
+        "classic",
+        "rte",
+        "swc"
+      ],
+      "topics": [
+        "AUTOSAR Classic"
+      ],
+      "title": "Rôle de la RTE",
+      "question": "Quel problème la Runtime Environment d'AUTOSAR Classic cherche-t-elle à résoudre ?",
+      "expected_answer": "Elle fournit une abstraction et un mécanisme de communication entre Software Components et avec les services sous-jacents, en séparant les applications de nombreux détails d'implémentation de la plateforme.",
+      "interviewer_memo": "La RTE sert d'intermédiaire entre SWC et le Basic Software. Les ports, interfaces et événements sont décrits dans la configuration AUTOSAR. Le niveau attendu dépend du profil, mais un Tech Lead doit comprendre l'objectif d'abstraction et les conséquences sur l'architecture.",
+      "follow_ups_and_signals": "Bon signal : mention des ports, interfaces, SWC et séparation application/BSP/BSW."
+    },
+    {
+      "id": "autosar_bsw",
+      "tags": [
+        "autosar",
+        "classic",
+        "bsw",
+        "architecture"
+      ],
+      "topics": [
+        "AUTOSAR Classic"
+      ],
+      "title": "Application vs BSW",
+      "question": "Pourquoi séparer les responsabilités entre les Software Components et le Basic Software dans AUTOSAR Classic ?",
+      "expected_answer": "Pour séparer la logique métier des services et abstractions de plateforme, favoriser réutilisation, portabilité, configuration et intégration.",
+      "interviewer_memo": "Le BSW contient notamment des services système, abstraction ECU, drivers et communication selon la pile. La séparation permet de réduire le couplage avec le matériel. Le Tech Lead doit aussi reconnaître le coût en configuration et complexité d'intégration.",
+      "follow_ups_and_signals": "Très bon signal : le candidat explique les bénéfices mais aussi le coût organisationnel et configurationnel."
+    },
+    {
+      "id": "autosar_arxml",
+      "tags": [
+        "autosar",
+        "arxml",
+        "configuration",
+        "tooling"
+      ],
+      "topics": [
+        "AUTOSAR",
+        "Toolchain"
+      ],
+      "title": "ARXML et configuration",
+      "question": "Une modification dans un ARXML provoque une génération de code différente et casse l'intégration. Comment sécuriserais-tu ce type de workflow ?",
+      "expected_answer": "Versionner les configurations, automatiser la génération, contrôler les versions des outils, valider les artefacts générés et intégrer des tests dans la CI.",
+      "interviewer_memo": "Les fichiers ARXML sont souvent une source importante de configuration système. La reproductibilité dépend aussi des versions des générateurs et de leurs paramètres. Un bon processus doit permettre de reproduire une génération à partir du repository.",
+      "follow_ups_and_signals": "Très bon signal : toolchain versionnée, génération reproductible, CI et artefacts contrôlés."
+    },
+    {
+      "id": "can_bus_arbitration",
+      "tags": [
+        "can",
+        "automotive",
+        "networking"
+      ],
+      "topics": [
+        "CAN"
+      ],
+      "title": "Arbitrage CAN",
+      "question": "Deux ECUs commencent à transmettre simultanément sur un bus CAN. Que se passe-t-il ?",
+      "expected_answer": "CAN utilise un arbitrage bit à bit non destructif basé sur la priorité de l'identifiant. Le message ayant la priorité la plus élevée continue tandis que les autres arrêtent leur transmission.",
+      "interviewer_memo": "Sur CAN classique, un bit dominant écrase un bit récessif. L'arbitrage permet à plusieurs nœuds de commencer à transmettre sans collision destructrice. Les identifiants déterminent donc indirectement la priorité.",
+      "follow_ups_and_signals": "Relance : « Que se passe-t-il si une trame a un identifiant très prioritaire et monopolise le bus ? » Attendu : problème de latence/fairness et nécessité de dimensionnement."
+    },
+    {
+      "id": "can_busload",
+      "tags": [
+        "can",
+        "automotive",
+        "performance",
+        "networking"
+      ],
+      "topics": [
+        "CAN",
+        "Performance"
+      ],
+      "title": "Bus CAN saturé",
+      "question": "Une fonction critique respecte ses deadlines en laboratoire mais pas sur un véhicule très chargé. Comment diagnostiques-tu le problème ?",
+      "expected_answer": "Mesurer le taux de charge du bus, la fréquence et taille des trames, les priorités, les temps de latence et l'effet des bursts. Vérifier ensuite le dimensionnement et les priorités.",
+      "interviewer_memo": "La charge moyenne n'est pas toujours suffisante : les deadlines dépendent aussi de l'arbitrage et du pire cas. Il faut regarder les priorités des messages et les interactions entre périodes et bursts.",
+      "follow_ups_and_signals": "Très bon signal : raisonnement worst-case plutôt que moyenne seule."
+    },
+    {
+      "id": "can_fd",
+      "tags": [
+        "can",
+        "can_fd",
+        "automotive",
+        "networking"
+      ],
+      "topics": [
+        "CAN FD"
+      ],
+      "title": "CAN classique vs CAN FD",
+      "question": "Dans quel cas CAN FD peut-il être intéressant par rapport au CAN classique ?",
+      "expected_answer": "Pour transporter davantage de données par trame et utiliser une phase data à débit supérieur, lorsque les contrôleurs et le réseau le permettent.",
+      "interviewer_memo": "CAN FD augmente notamment la taille de payload et permet une vitesse différente pendant la phase data. Il ne faut pas présenter CAN FD comme simplement « CAN plus rapide » : il faut considérer compatibilité ECU, transceivers, réseau et architecture.",
+      "follow_ups_and_signals": "Bon signal : mention de compatibilité et de coexistence avec l'écosystème existant."
+    },
+    {
+      "id": "can_error_handling",
+      "tags": [
+        "can",
+        "automotive",
+        "fault_tolerance"
+      ],
+      "topics": [
+        "CAN",
+        "Diagnostic"
+      ],
+      "title": "Erreurs et bus-off",
+      "question": "Une ECU finit régulièrement en bus-off. Comment raisonnes-tu pour trouver la cause ?",
+      "expected_answer": "Examiner les erreurs CAN, leur fréquence, les conditions d'apparition, la configuration physique et timing, les autres nœuds, puis vérifier la stratégie de recovery.",
+      "interviewer_memo": "CAN dispose de mécanismes de détection d'erreurs et les contrôleurs gèrent des compteurs d'erreurs. Le bus-off correspond à un état où le nœud se retire du bus. Il faut distinguer défaut physique, mauvais bit timing, terminaison, transceiver et comportement logiciel.",
+      "follow_ups_and_signals": "Très bon signal : oscilloscope/analyseur CAN, inspection physique et corrélation avec la charge et les autres ECUs."
+    },
+    {
+      "id": "someip_basics",
+      "tags": [
+        "someip",
+        "autosar",
+        "ethernet",
+        "automotive"
+      ],
+      "topics": [
+        "SOME/IP"
+      ],
+      "title": "Pourquoi SOME/IP ?",
+      "question": "Quel besoin SOME/IP répond-il dans une architecture Automotive moderne ?",
+      "expected_answer": "Fournir une communication orientée services sur Ethernet, avec découverte de services et différents modes d'échange adaptés à des architectures distribuées.",
+      "interviewer_memo": "SOME/IP signifie Scalable service-Oriented MiddlewarE over IP. Il permet notamment request/response, notifications/events et service discovery via SOME/IP-SD. Il s'inscrit bien dans des architectures Ethernet et service-oriented.",
+      "follow_ups_and_signals": "Bon signal : le candidat distingue communication orientée signaux et orientée services."
+    },
+    {
+      "id": "someip_sd",
+      "tags": [
+        "someip",
+        "someip_sd",
+        "automotive",
+        "ethernet"
+      ],
+      "topics": [
+        "SOME/IP"
+      ],
+      "title": "Service Discovery",
+      "question": "Une application SOME/IP ne trouve plus un service après un redémarrage réseau. Que vérifies-tu ?",
+      "expected_answer": "Vérifier le service discovery, les annonces/offers, les subscriptions, l'adressage IP, les ports, multicast si utilisé, les timeouts et l'état du réseau.",
+      "interviewer_memo": "SOME/IP-SD permet aux services de s'annoncer et aux clients de rechercher/souscrire. Il faut distinguer problème applicatif, SD, transport UDP/TCP et réseau Ethernet.",
+      "follow_ups_and_signals": "Très bon signal : utilisation d'une capture réseau et raisonnement par couches."
+    },
+    {
+      "id": "someip_tcp_udp",
+      "tags": [
+        "someip",
+        "tcp",
+        "udp",
+        "networking",
+        "automotive"
+      ],
+      "topics": [
+        "SOME/IP",
+        "Réseau"
+      ],
+      "title": "TCP ou UDP avec SOME/IP",
+      "question": "Comment choisir entre TCP et UDP pour une communication SOME/IP ?",
+      "expected_answer": "Le choix dépend du type de communication, des garanties nécessaires, de la taille des messages et de la sensibilité à la latence/perte. UDP peut être adapté à des événements et TCP à des échanges nécessitant une livraison fiable.",
+      "interviewer_memo": "Il faut éviter le raccourci « UDP = temps réel ». UDP ne fournit pas de fiabilité ou ordre. TCP fournit un flux fiable mais peut introduire des comportements de retransmission et de blocage qui ne sont pas toujours souhaitables.",
+      "follow_ups_and_signals": "Très bon signal : discussion sur deadlines, perte acceptable, retransmission et comportement en cas de congestion."
+    },
+    {
+      "id": "someip_debugging",
+      "tags": [
+        "someip",
+        "debugging",
+        "wireshark",
+        "automotive"
+      ],
+      "topics": [
+        "SOME/IP",
+        "Debugging"
+      ],
+      "title": "Debug d'une communication SOME/IP",
+      "question": "Le client appelle une méthode SOME/IP mais n'obtient aucune réponse. Quelle démarche de debugging adoptes-tu ?",
+      "expected_answer": "Commencer par vérifier si la requête sort réellement, puis adresser/routage/port, SD, serveur, traitement applicatif et réponse. Utiliser des captures réseau et logs corrélés.",
+      "interviewer_memo": "Une démarche efficace suit les couches : application → middleware → socket → IP/Ethernet. Wireshark peut confirmer service ID, method ID, client/session ID, ports et présence d'une réponse. Les logs doivent être corrélés temporellement.",
+      "follow_ups_and_signals": "Bon signal : ne pas commencer par modifier le code au hasard ; d'abord prouver où le message disparaît."
+    },
+    {
+      "id": "linux_process_thread",
+      "tags": [
+        "linux",
+        "process",
+        "thread",
+        "cpp"
+      ],
+      "topics": [
+        "Linux"
+      ],
+      "title": "Processus vs threads",
+      "question": "Sur Linux, quand privilégierais-tu plusieurs processus plutôt que plusieurs threads pour une application Automotive ?",
+      "expected_answer": "Les processus offrent davantage d'isolation mémoire et de fault containment, tandis que les threads facilitent le partage d'état mais partagent le même espace mémoire.",
+      "interviewer_memo": "Un crash mémoire dans un thread peut compromettre tout le processus. Plusieurs processus peuvent donc améliorer l'isolation au prix de communications inter-processus et d'une complexité supérieure. Le choix dépend aussi des contraintes temps réel, mémoire et architecture.",
+      "follow_ups_and_signals": "Très bon signal : le candidat raisonne en isolation de fautes et pas uniquement en performance."
+    },
+    {
+      "id": "linux_memory_debug",
+      "tags": [
+        "linux",
+        "memory",
+        "debugging",
+        "cpp"
+      ],
+      "topics": [
+        "Linux",
+        "Debugging"
+      ],
+      "title": "Fuite mémoire Linux",
+      "question": "Un daemon C++ consomme progressivement toute la RAM d'une machine Linux. Comment enquêtes-tu ?",
+      "expected_answer": "Confirmer la tendance, identifier le processus, profiler/inspecter les allocations, reproduire, rechercher allocations non libérées ou caches non bornés et valider la correction.",
+      "interviewer_memo": "Outils possibles : Valgrind, sanitizers, heap profilers, /proc, pmap selon contexte. Il faut distinguer fuite réelle, cache volontaire, fragmentation et croissance de buffers. En production, éviter d'activer des outils trop intrusifs sans stratégie.",
+      "follow_ups_and_signals": "Bon signal : mesure d'abord, hypothèse ensuite. Très bon signal : distinction heap growth/cache/fragmentation."
+    },
+    {
+      "id": "linux_cpu_debug",
+      "tags": [
+        "linux",
+        "cpu",
+        "performance",
+        "profiling"
+      ],
+      "topics": [
+        "Linux",
+        "Performance"
+      ],
+      "title": "CPU à 100 %",
+      "question": "Une application de traitement de données CAN consomme soudainement un cœur CPU à 100 %. Comment procèdes-tu ?",
+      "expected_answer": "Identifier le thread fautif, profiler les hotspots, vérifier boucles/polling excessif, contention, I/O et changement récent. Corriger puis mesurer à nouveau.",
+      "interviewer_memo": "top/htop peuvent identifier le processus ; des outils de profiling permettent ensuite d'identifier la fonction responsable. Un polling agressif ou une boucle sans attente est un cas classique.",
+      "follow_ups_and_signals": "Très bon signal : distinguer CPU réellement utile, spinlock et busy-wait."
+    },
+    {
+      "id": "linux_ipc",
+      "tags": [
+        "linux",
+        "ipc",
+        "architecture"
+      ],
+      "topics": [
+        "Linux",
+        "Architecture"
+      ],
+      "title": "IPC entre processus",
+      "question": "Deux processus Linux doivent échanger des messages à faible latence. Quelles options envisages-tu ?",
+      "expected_answer": "Pipes, Unix sockets, shared memory, queues ou autres IPC selon les besoins de débit, latence, synchronisation et isolation.",
+      "interviewer_memo": "Unix domain sockets offrent une interface pratique. Shared memory peut être très performante mais nécessite une synchronisation rigoureuse et une gestion complexe du cycle de vie. Le choix dépend du volume, de la latence et de la robustesse attendue.",
+      "follow_ups_and_signals": "Bon signal : comparer les options au lieu de donner une solution unique."
+    },
+    {
+      "id": "linux_realtime",
+      "tags": [
+        "linux",
+        "realtime",
+        "latency",
+        "automotive"
+      ],
+      "topics": [
+        "Linux",
+        "Temps réel"
+      ],
+      "title": "Linux et contraintes temps réel",
+      "question": "Une fonction doit respecter une deadline stricte sur Linux. Quels risques identifies-tu ?",
+      "expected_answer": "Scheduling, préemption, contention, interruptions, I/O bloquantes, page faults, charge système et jitter peuvent affecter la latence. Il faut mesurer le worst-case et choisir une architecture adaptée.",
+      "interviewer_memo": "Il faut distinguer moyenne et worst-case latency. Selon le système, des mécanismes comme scheduling temps réel, CPU affinity, mémoire verrouillée et configuration adaptée peuvent réduire le jitter, mais aucune optimisation ne doit être supposée sans mesure.",
+      "follow_ups_and_signals": "Très bon signal : le candidat parle de WCET/latence pire cas et de jitter."
+    },
+    {
+      "id": "linux_systemd",
+      "tags": [
+        "linux",
+        "systemd",
+        "production",
+        "deployment"
+      ],
+      "topics": [
+        "Linux",
+        "Production"
+      ],
+      "title": "Daemon Linux robuste",
+      "question": "Tu dois transformer une application C++ en service Linux de production. Quels mécanismes mets-tu en place ?",
+      "expected_answer": "Gestion du démarrage/arrêt, supervision, logs, restart policy, dépendances, utilisateur dédié, limites de ressources et configuration externe.",
+      "interviewer_memo": "systemd permet notamment de gérer le cycle de vie, les redémarrages et les dépendances. Il faut aussi réfléchir aux permissions, watchdog, logs, graceful shutdown et comportement après crash.",
+      "follow_ups_and_signals": "Bon signal : graceful shutdown, restart contrôlé, watchdog et principe du moindre privilège."
+    },
+    {
+      "id": "linux_network_debug",
+      "tags": [
+        "linux",
+        "networking",
+        "debugging",
+        "tcpip"
+      ],
+      "topics": [
+        "Linux",
+        "Réseau"
+      ],
+      "title": "Debug réseau Linux",
+      "question": "Une ECU Linux ne reçoit plus de messages Ethernet. Comment determines-tu si le problème vient du réseau ou de l'application ?",
+      "expected_answer": "Vérifier interface/link/IP/routes, observer les paquets avec des outils réseau, vérifier sockets/ports puis logs applicatifs.",
+      "interviewer_memo": "La démarche par couches est importante : physique/link → interface → IP → transport → socket → middleware → application. Outils possibles : ip, ss, tcpdump, Wireshark, logs.",
+      "follow_ups_and_signals": "Très bon signal : capture réseau avant modification du code."
+    },
+    {
+      "id": "architecture_signal_service",
+      "tags": [
+        "automotive",
+        "architecture",
+        "can",
+        "someip",
+        "service_oriented"
+      ],
+      "topics": [
+        "Architecture Automotive"
+      ],
+      "title": "CAN vers SOME/IP",
+      "question": "Tu dois faire évoluer une architecture basée sur CAN vers une architecture Ethernet orientée services. Qu'est-ce qui change réellement ?",
+      "expected_answer": "Le modèle de communication évolue d'une logique principalement signal/message vers des services et événements. Cela implique contrats, découverte, adressage, gestion du cycle de vie, cybersécurité et nouveaux comportements réseau.",
+      "interviewer_memo": "Il ne s'agit pas simplement de remplacer CAN par Ethernet. Le modèle mental change : services, instances, clients/providers, découverte et dépendances dynamiques. Il faut aussi revoir monitoring, diagnostic, sécurité et gestion des versions.",
+      "follow_ups_and_signals": "Très bon signal : le candidat parle de transformation architecturale et pas seulement de débit."
+    },
+    {
+      "id": "architecture_gateway",
+      "tags": [
+        "automotive",
+        "architecture",
+        "gateway",
+        "can",
+        "ethernet"
+      ],
+      "topics": [
+        "Architecture Automotive"
+      ],
+      "title": "Gateway CAN / Ethernet",
+      "question": "Comment concevrais-tu une gateway entre plusieurs réseaux CAN et un backbone Ethernet ?",
+      "expected_answer": "Définir les flux, priorités, règles de routage/conversion, buffering, gestion des erreurs, timing, sécurité et observabilité.",
+      "interviewer_memo": "Une gateway peut faire du forwarding ou de la transformation de données. Les délais introduits et les problèmes de saturation sont importants. Il faut aussi gérer les comportements lorsque l'un des réseaux devient indisponible.",
+      "follow_ups_and_signals": "Bon signal : parler des budgets de latence, backpressure et comportement en défaut."
+    },
+    {
+      "id": "architecture_interfaces",
+      "tags": [
+        "architecture",
+        "cpp",
+        "autosar",
+        "someip"
+      ],
+      "topics": [
+        "Architecture"
+      ],
+      "title": "Définir une frontière de composant",
+      "question": "Comment décides-tu où placer la frontière entre deux composants logiciels Automotive ?",
+      "expected_answer": "Examiner responsabilités, cohésion, couplage, fréquence des échanges, ownership des données, contraintes de déploiement, sécurité et testabilité.",
+      "interviewer_memo": "Une bonne frontière minimise les dépendances et garde une responsabilité cohérente. Une séparation artificielle peut au contraire multiplier les communications et complexifier le système. Le Tech Lead doit penser aussi aux équipes et au déploiement.",
+      "follow_ups_and_signals": "Très bon signal : prise en compte simultanée de cohésion, couplage et contraintes runtime."
+    },
+    {
+      "id": "architecture_latency_budget",
+      "tags": [
+        "architecture",
+        "automotive",
+        "latency",
+        "performance"
+      ],
+      "topics": [
+        "Architecture",
+        "Performance"
+      ],
+      "title": "Budget de latence",
+      "question": "Une fonction véhicule doit répondre en moins de 50 ms de bout en bout. Comment construis-tu un budget de latence ?",
+      "expected_answer": "Découper le budget entre acquisition, communication, traitement, scheduling et sortie, puis mesurer chaque segment et réserver une marge.",
+      "interviewer_memo": "Le budget doit considérer les pires cas et pas uniquement les moyennes. Il faut également prendre en compte jitter, retransmissions éventuelles, scheduling et contention.",
+      "follow_ups_and_signals": "Très bon signal : marge explicite et mesures de bout en bout."
+    },
+    {
+      "id": "testing_cpp",
+      "tags": [
+        "cpp",
+        "testing",
+        "automotive",
+        "quality"
+      ],
+      "topics": [
+        "Qualité"
+      ],
+      "title": "Stratégie de tests C++",
+      "question": "Comment construis-tu une stratégie de tests pour un composant C++ critique ?",
+      "expected_answer": "Combiner tests unitaires, tests d'intégration, tests système et tests sur cible selon les risques. Isoler les dépendances et automatiser autant que possible.",
+      "interviewer_memo": "Le candidat doit raisonner en pyramide de tests et en analyse de risque. Les tests unitaires doivent rester rapides ; les tests hardware-in-the-loop complètent les tests logiciels mais ne remplacent pas une bonne couverture unitaire.",
+      "follow_ups_and_signals": "Bon signal : tests négatifs, limites, erreurs et comportements temporels."
+    },
+    {
+      "id": "testing_can",
+      "tags": [
+        "can",
+        "testing",
+        "automotive",
+        "simulation"
+      ],
+      "topics": [
+        "CAN",
+        "Tests"
+      ],
+      "title": "Tester une pile CAN",
+      "question": "Comment testerais-tu un composant qui reçoit des trames CAN provenant de dizaines d'ECUs ?",
+      "expected_answer": "Simulation des messages, tests unitaires sur parsing/validation, tests d'intégration avec un bus simulé ou réel et scénarios de charge et d'erreur.",
+      "interviewer_memo": "Il faut tester trames invalides, messages manquants, fréquence incorrecte, valeurs hors plage et charge élevée. La simulation permet une grande couverture reproductible ; le hardware permet de valider l'intégration réelle.",
+      "follow_ups_and_signals": "Très bon signal : tests déterministes et injection de défauts."
+    },
+    {
+      "id": "debug_intermitent",
+      "tags": [
+        "cpp",
+        "debugging",
+        "automotive",
+        "production"
+      ],
+      "topics": [
+        "Debugging"
+      ],
+      "title": "Bug intermittent",
+      "question": "Un bug n'apparaît qu'une fois toutes les 100 heures sur un véhicule réel. Comment l'attaques-tu ?",
+      "expected_answer": "Augmenter l'observabilité, capturer le contexte avant/après incident, rechercher les conditions corrélées, reproduire avec stress/fault injection et réduire le problème.",
+      "interviewer_memo": "Le défi est de transformer un événement rare en données exploitables. Ring buffers de logs, compteurs, traces et dumps peuvent être utiles. Il faut éviter d'ajouter tellement de logging que le problème change de comportement.",
+      "follow_ups_and_signals": "Très bon signal : instrumentation ciblée et reproductibilité progressive."
+    },
+    {
+      "id": "debug_wrong_data",
+      "tags": [
+        "can",
+        "cpp",
+        "debugging",
+        "automotive"
+      ],
+      "topics": [
+        "Debugging",
+        "CAN"
+      ],
+      "title": "Valeur CAN incorrecte",
+      "question": "Une température affichée est parfois dix fois trop élevée. Le réseau semble fonctionner. Où cherches-tu ?",
+      "expected_answer": "Vérifier définition du signal, endianness, scaling/offset, taille, signedness, multiplexage et conversion jusqu'à l'affichage.",
+      "interviewer_memo": "Un message CAN peut encoder une valeur physique avec facteur et offset. Une erreur d'endianness ou de signedness peut produire des valeurs aberrantes. Il faut comparer la trame brute, le décodage puis la valeur métier.",
+      "follow_ups_and_signals": "Très bon signal : commencer par la trame brute et remonter la chaîne de transformation."
+    },
+    {
+      "id": "security_secure_boot",
+      "tags": [
+        "security",
+        "automotive",
+        "embedded",
+        "secure_boot"
+      ],
+      "topics": [
+        "Cybersécurité"
+      ],
+      "title": "Secure boot et firmware",
+      "question": "Comment empêcher qu'un attaquant installe un firmware modifié sur une ECU ?",
+      "expected_answer": "Mettre en place une chaîne de confiance avec vérification cryptographique du firmware avant exécution, clés protégées et mécanismes de mise à jour sécurisés.",
+      "interviewer_memo": "Secure boot vérifie l'authenticité/intégrité des étapes de démarrage. Les signatures numériques permettent de vérifier l'origine du firmware. Il faut protéger les clés de confiance et prévoir la rotation/révocation selon l'architecture.",
+      "follow_ups_and_signals": "Très bon signal : distinguer chiffrement et signature. Le chiffrement seul ne garantit pas l'authenticité."
+    },
+    {
+      "id": "security_someip",
+      "tags": [
+        "security",
+        "someip",
+        "automotive",
+        "ethernet"
+      ],
+      "topics": [
+        "Cybersécurité",
+        "SOME/IP"
+      ],
+      "title": "Sécuriser une communication SOME/IP",
+      "question": "Une nouvelle fonction SOME/IP expose une commande critique sur Ethernet. Quels risques et protections envisages-tu ?",
+      "expected_answer": "Authentification, contrôle d'accès, intégrité, segmentation réseau, validation des entrées, protection contre replay et abus, selon l'architecture de sécurité.",
+      "interviewer_memo": "Une communication Ethernet interne ne doit pas automatiquement être considérée comme fiable. La sécurité dépend du modèle de menace. Le candidat peut évoquer SecOC dans l'écosystème AUTOSAR Classic, TLS/IPsec selon les cas, filtrage et isolation.",
+      "follow_ups_and_signals": "Bon signal : commencer par threat modeling plutôt que citer une technologie unique."
+    },
+    {
+      "id": "ci_cd_automotive",
+      "tags": [
+        "ci_cd",
+        "automotive",
+        "cpp",
+        "autosar",
+        "quality"
+      ],
+      "topics": [
+        "CI/CD",
+        "Qualité"
+      ],
+      "title": "CI pour un projet C++ Automotive",
+      "question": "Que voudrais-tu automatiser dans une CI pour une stack C++ Automotive ?",
+      "expected_answer": "Builds reproductibles, compilation multi-cibles, tests unitaires, static analysis, formatting si applicable, contrôles de dépendances, packaging et tests d'intégration.",
+      "interviewer_memo": "Dans un environnement Automotive, les contraintes de coding guidelines et de traçabilité peuvent être fortes. Il faut également versionner toolchains et dépendances pour garantir la reproductibilité.",
+      "follow_ups_and_signals": "Très bon signal : distinguer les checks rapides de ceux nécessitant une cible matérielle."
+    },
+    {
+      "id": "techlead_architecture_decision",
+      "tags": [
+        "tech_lead",
+        "architecture",
+        "decision",
+        "adr"
+      ],
+      "topics": [
+        "Leadership",
+        "Architecture"
+      ],
+      "title": "Prendre une décision d'architecture",
+      "question": "Deux solutions sont techniquement possibles et l'équipe n'arrive pas à se mettre d'accord. Comment prends-tu la décision ?",
+      "expected_answer": "Définir les critères, expliciter les contraintes, comparer objectivement, éventuellement réaliser un POC, prendre la décision et documenter les raisons.",
+      "interviewer_memo": "Un Tech Lead ne doit pas nécessairement avoir raison seul. Il doit créer un processus de décision. Un ADR peut documenter contexte, options, décision et conséquences. Les critères peuvent inclure performance, coût, risque, maintenabilité, compétences et time-to-market.",
+      "follow_ups_and_signals": "Mauvais signal : « Je tranche parce que je suis le Tech Lead ». Très bon signal : décision basée sur critères et capacité à la remettre en question."
+    },
+    {
+      "id": "techlead_legacy",
+      "tags": [
+        "tech_lead",
+        "legacy",
+        "cpp",
+        "refactoring"
+      ],
+      "topics": [
+        "Leadership",
+        "Legacy"
+      ],
+      "title": "Refactoring d'un legacy C++",
+      "question": "Tu arrives sur une base C++ de 15 ans, peu testée, mais critique pour le produit. Comment l'améliores-tu sans tout réécrire ?",
+      "expected_answer": "Cartographier les risques, ajouter progressivement des tests, isoler les zones, refactorer par petites étapes et prioriser les endroits qui changent ou posent problème.",
+      "interviewer_memo": "Une réécriture complète est souvent risquée. Le pattern « strangler » ou une modernisation incrémentale peut être pertinent. Il faut créer des characterization tests avant certaines transformations et améliorer l'architecture progressivement.",
+      "follow_ups_and_signals": "Très bon signal : « refactor where you touch », tests de caractérisation et réduction progressive de la dette."
+    },
+    {
+      "id": "techlead_team_quality",
+      "tags": [
+        "tech_lead",
+        "code_review",
+        "quality",
+        "leadership"
+      ],
+      "topics": [
+        "Leadership",
+        "Qualité"
+      ],
+      "title": "Faire progresser le niveau technique",
+      "question": "Ton équipe produit régulièrement du code fonctionnel mais accumule des défauts de qualité. Que fais-tu en tant que Tech Lead ?",
+      "expected_answer": "Identifier les causes, améliorer les pratiques et garde-fous, faire évoluer les revues, automatiser les contrôles et accompagner les développeurs plutôt que simplement imposer des règles.",
+      "interviewer_memo": "Le Tech Lead doit agir sur le système : définition de done, CI, tests, static analysis, revue de code, mentoring et architecture. Il faut éviter de transformer la qualité en contrôle bureaucratique.",
+      "follow_ups_and_signals": "Très bon signal : combinaison automatisation + mentoring + amélioration du process."
+    },
+    {
+      "id": "techlead_schedule_tradeoff",
+      "tags": [
+        "tech_lead",
+        "planning",
+        "architecture",
+        "tradeoff"
+      ],
+      "topics": [
+        "Leadership",
+        "Arbitrage"
+      ],
+      "title": "Jalon impossible",
+      "question": "Le jalon doit être tenu mais l'équipe est réduite et plusieurs risques techniques apparaissent. Comment réagis-tu ?",
+      "expected_answer": "Rendre les risques visibles, quantifier leur impact, proposer des scénarios d'arbitrage sur périmètre, qualité, ressources ou délai et faire prendre la décision au bon niveau.",
+      "interviewer_memo": "Un Tech Lead ne doit pas cacher les risques pour tenir artificiellement une date. Il doit proposer des options : réduire scope, phaser, augmenter ressources, accepter explicitement un risque ou décaler. L'important est la décision consciente.",
+      "follow_ups_and_signals": "Très bon signal : distinguer urgence et importance et présenter des options avec conséquences."
+    },
+    {
+      "id": "techlead_incident",
+      "tags": [
+        "tech_lead",
+        "incident",
+        "production",
+        "leadership"
+      ],
+      "topics": [
+        "Leadership",
+        "Production"
+      ],
+      "title": "Incident de production",
+      "question": "Une release provoque des crashes sur plusieurs véhicules. Que fais-tu pendant les premières minutes puis après l'incident ?",
+      "expected_answer": "Stabiliser, limiter la propagation, décider rollback ou mitigation, établir une chaîne de responsabilité et communication, puis réaliser postmortem et actions correctives.",
+      "interviewer_memo": "Pendant l'incident : priorité au rétablissement et à la collecte de faits. Après : root cause, facteurs contributifs, tests manquants, amélioration du rollout et absence de blame individuel. Les actions doivent être suivies jusqu'à leur clôture.",
+      "follow_ups_and_signals": "Bon signal : capacité à prendre une décision avec informations incomplètes. Très bon signal : amélioration systémique après incident."
+    }
+  ]
+}
