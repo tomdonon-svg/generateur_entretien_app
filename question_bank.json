@@ -1,0 +1,203 @@
+{
+  "schema_version": "1.0",
+  "description": "Exemple de banque locale pour Interview Builder.",
+  "questions": [
+    {
+      "id": "cpp-iot-001",
+      "question": "Vous devez faire communiquer un composant C++ embarqué avec un service cloud. Comment choisiriez-vous entre MQTT, gRPC et REST ?",
+      "expected_answer": "Le candidat doit comparer les contraintes de communication plutôt que citer une technologie comme universellement meilleure. MQTT est particulièrement adapté au messaging publish/subscribe, aux environnements contraints et aux communications événementielles. gRPC est adapté aux appels de services fortement typés, notamment entre composants maîtrisés, avec Protobuf et HTTP/2. REST/HTTP est intéressant pour des API largement interopérables et orientées ressources. Il faut évoquer le débit, la latence, la taille des messages, le modèle de communication, la robustesse réseau, la sécurité, l'observabilité et la facilité d'intégration.",
+      "interviewer_memo": "Points à écouter : distinction protocole de transport / modèle applicatif ; pub/sub versus request/response ; contrats Protobuf avec gRPC ; HTTP et interopérabilité de REST ; contraintes d'un système embarqué ; TLS et authentification ; gestion des reconnexions ; versionnement des contrats. Une bonne réponse ne se limite pas à « MQTT est plus léger ». Pour un profil senior, rechercher une justification liée aux contraintes métier et une stratégie hybride possible.",
+      "follow_ups": [
+        "Que se passe-t-il si le réseau est indisponible pendant plusieurs minutes ?",
+        "Comment versionneriez-vous le contrat sans casser les clients existants ?",
+        "Comment sécuriseriez-vous les communications ?"
+      ],
+      "themes": [
+        "Communication",
+        "Architecture"
+      ],
+      "scenario": "Plateforme IoT industrielle : un équipement C++ collecte des données machine et les transmet à un backend cloud.",
+      "languages": [
+        "C++"
+      ],
+      "specialties": [
+        "IoT",
+        "Backend",
+        "Architecture"
+      ],
+      "levels": [
+        "Intermédiaire",
+        "Senior"
+      ],
+      "technologies": [
+        "MQTT",
+        "gRPC",
+        "REST",
+        "HTTP",
+        "Protobuf"
+      ],
+      "estimated_minutes": 7
+    },
+    {
+      "id": "cpp-iot-002",
+      "question": "Dans un service C++, comment concevez-vous la gestion de la durée de vie des objets lorsque plusieurs composants partagent des ressources ?",
+      "expected_answer": "Le candidat doit connaître RAII et privilégier les objets à durée de vie déterministe. Il doit distinguer ownership et simple observation. std::unique_ptr représente une propriété exclusive, std::shared_ptr une propriété partagée avec comptage de références et std::weak_ptr une observation non propriétaire permettant notamment d'éviter certains cycles. Les ressources doivent être libérées automatiquement, y compris en cas d'exception.",
+      "interviewer_memo": "Attendus : RAII, stack versus heap, ownership explicite, unique_ptr par défaut lorsqu'il existe un propriétaire unique, shared_ptr seulement lorsque la propriété partagée est réellement nécessaire. Vérifier que le candidat sait expliquer un cycle shared_ptr/shared_ptr et le rôle de weak_ptr. Pour un senior, demander l'impact du shared_ptr sur la conception et la concurrence.",
+      "follow_ups": [
+        "Quand utiliseriez-vous std::weak_ptr ?",
+        "Pourquoi ne pas utiliser std::shared_ptr partout ?",
+        "Comment gérer une ressource non mémoire, par exemple un socket ou un fichier ?"
+      ],
+      "themes": [
+        "C++",
+        "Gestion mémoire"
+      ],
+      "scenario": "Le service C++ contient plusieurs composants qui manipulent des ressources système et des objets métier.",
+      "languages": [
+        "C++"
+      ],
+      "specialties": [
+        "C++",
+        "IoT"
+      ],
+      "levels": [
+        "Intermédiaire",
+        "Senior"
+      ],
+      "technologies": [
+        "STL",
+        "Smart pointers"
+      ],
+      "estimated_minutes": 6
+    },
+    {
+      "id": "cpp-iot-003",
+      "question": "Comment concevriez-vous un système de collecte continue de données machine capable de supporter une coupure réseau ?",
+      "expected_answer": "Il faut séparer collecte locale, stockage tampon et synchronisation cloud. Le producteur de données ne doit pas être bloqué par le réseau. Une file locale ou un buffer persistant peut stocker les événements pendant la coupure. Un composant de synchronisation tente ensuite de transmettre les données, avec reprise, backoff et gestion des doublons. Le design doit définir les garanties de livraison, la stratégie de purge, la limite de stockage et le comportement en cas de corruption.",
+      "interviewer_memo": "Points clés : découplage producteur/consommateur, bufferisation, persistance locale, backpressure, retry avec backoff, idempotence, identifiant d'événement, ordre des messages, limites disque, métriques et alertes. Pour un senior, demander une discussion at-least-once versus at-most-once et les conséquences sur le backend.",
+      "follow_ups": [
+        "Comment éviteriez-vous les doublons après une reconnexion ?",
+        "Que faites-vous si le stockage local est plein ?",
+        "Quelle garantie de livraison choisiriez-vous et pourquoi ?"
+      ],
+      "themes": [
+        "Architecture",
+        "Résilience",
+        "Data"
+      ],
+      "scenario": "Une machine industrielle produit des mesures pendant plusieurs semaines, avec un réseau parfois indisponible.",
+      "languages": [
+        "C++"
+      ],
+      "specialties": [
+        "IoT",
+        "Architecture"
+      ],
+      "levels": [
+        "Senior"
+      ],
+      "technologies": [
+        "MQTT",
+        "AWS IoT",
+        "Stockage local"
+      ],
+      "estimated_minutes": 8
+    },
+    {
+      "id": "cpp-iot-004",
+      "question": "Un message MQTT arrive deux fois dans le backend. Comment concevez-vous le traitement pour que le système reste correct ?",
+      "expected_answer": "Le système doit considérer les doublons comme possibles selon les garanties choisies. Une approche robuste consiste à donner à chaque événement un identifiant unique et à rendre le traitement idempotent. Le backend peut mémoriser les identifiants déjà traités ou utiliser une contrainte d'unicité au niveau du stockage. Il faut aussi distinguer déduplication, ordre des messages et perte de messages.",
+      "interviewer_memo": "Attendus : idempotence, event ID, contrainte unique, traitement transactionnel, TTL éventuel de la table de déduplication, QoS MQTT et limites de chaque garantie. Une réponse senior doit comprendre que QoS ne supprime pas automatiquement tous les problèmes applicatifs de doublon.",
+      "follow_ups": [
+        "Quelle différence faites-vous entre QoS 0, 1 et 2 ?",
+        "Où placeriez-vous la déduplication : gateway, broker ou backend ?",
+        "Comment testeriez-vous ce comportement ?"
+      ],
+      "themes": [
+        "MQTT",
+        "Résilience",
+        "Data"
+      ],
+      "scenario": "Le backend reçoit des mesures IoT via MQTT et doit garantir un traitement cohérent malgré les retransmissions.",
+      "languages": [
+        "C++"
+      ],
+      "specialties": [
+        "IoT",
+        "Backend"
+      ],
+      "levels": [
+        "Intermédiaire",
+        "Senior"
+      ],
+      "technologies": [
+        "MQTT"
+      ],
+      "estimated_minutes": 6
+    },
+    {
+      "id": "cpp-iot-005",
+      "question": "Vous devez faire évoluer une API gRPC utilisée par plusieurs versions d'équipements. Comment procédez-vous ?",
+      "expected_answer": "Le candidat doit parler de compatibilité ascendante et descendante, de règles de versionnement Protobuf et de déploiement progressif. Il faut éviter de réutiliser les numéros de champs supprimés, ajouter de nouveaux champs de manière compatible et prévoir la coexistence de versions. Les changements incompatibles peuvent nécessiter une nouvelle méthode ou un nouveau service/version d'API.",
+      "interviewer_memo": "Écouter : numéros de champs Protobuf, champs optionnels/repeated, unknown fields, backward/forward compatibility, déploiement progressif, compatibilité client/serveur. Une bonne réponse explique pourquoi le numéro de champ ne doit pas être recyclé.",
+      "follow_ups": [
+        "Pourquoi le numéro d'un champ Protobuf est-il important ?",
+        "Comment déployeriez-vous un nouveau champ sans mettre à jour tous les clients ?",
+        "Quand créeriez-vous une v2 de l'API ?"
+      ],
+      "themes": [
+        "API",
+        "Architecture",
+        "Versionnement"
+      ],
+      "scenario": "Des équipements industriels ont des cycles de mise à jour longs alors que le backend évolue régulièrement.",
+      "languages": [
+        "C++"
+      ],
+      "specialties": [
+        "IoT",
+        "Architecture"
+      ],
+      "levels": [
+        "Senior"
+      ],
+      "technologies": [
+        "gRPC",
+        "Protobuf"
+      ],
+      "estimated_minutes": 7
+    },
+    {
+      "id": "cpp-iot-006",
+      "question": "Comment testeriez-vous un composant C++ qui publie des mesures MQTT sans dépendre d'un broker réel dans tous les tests ?",
+      "expected_answer": "Il faut séparer la logique métier du transport et injecter une abstraction représentant le publisher. Les tests unitaires peuvent utiliser un mock/fake pour vérifier les messages produits. Des tests d'intégration peuvent ensuite utiliser un broker réel ou conteneurisé. Il faut tester les erreurs de publication, les retries, les timeouts et les cas limites séparément.",
+      "interviewer_memo": "Attendus : testabilité par séparation des responsabilités, injection de dépendances, interface étroite, fake/mock, distinction unitaires/intégration. Éviter de rendre tout le code abstrait sans raison. Pour un senior, demander comment tester les comportements asynchrones et éviter les tests fragiles.",
+      "follow_ups": [
+        "Quelle différence entre mock et fake dans ce contexte ?",
+        "Que testeriez-vous avec un vrai broker ?",
+        "Comment testeriez-vous un timeout ou une reconnexion ?"
+      ],
+      "themes": [
+        "Tests",
+        "Architecture"
+      ],
+      "scenario": "Un agent C++ collecte les données machine et les publie via MQTT.",
+      "languages": [
+        "C++"
+      ],
+      "specialties": [
+        "IoT",
+        "Testing"
+      ],
+      "levels": [
+        "Intermédiaire",
+        "Senior"
+      ],
+      "technologies": [
+        "MQTT",
+        "GoogleTest"
+      ],
+      "estimated_minutes": 6
+    }
+  ]
+}
